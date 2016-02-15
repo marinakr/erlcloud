@@ -47,7 +47,9 @@
 
 -type sns_endpoint_attribute() :: custom_user_data
                                 | enabled
-                                | token.
+                                | token
+                                | user_id
+                                | channel_id.
 
 -type sns_endpoint() :: [{arn, string()} | {attributes, [{arn|sns_endpoint_attribute(), string()}]}].
 
@@ -126,13 +128,13 @@ create_platform_endpoint(PlatformApplicationArn, Token, CustomUserData, Attribut
 
 -spec create_platform_endpoint/5 :: (string(), string(), string(), [{sns_endpoint_attribute(), string()}], aws_config()) -> string().
 create_platform_endpoint(PlatformApplicationArn, Token, CustomUserData, Attributes, Config) ->
-    Doc =
+  Doc =
         sns_xml_request(
             Config, "CreatePlatformEndpoint",
             [{"PlatformApplicationArn", PlatformApplicationArn},
              {"Token",                  Token},
              {"CustomUserData",         CustomUserData}
-             | encode_attributes(Attributes)
+             |  encode_attributes(Attributes)
              ]),
     erlcloud_xml:get_text(
         "CreatePlatformEndpointResult/EndpointArn", Doc).
@@ -508,7 +510,9 @@ encode_attributes(Attributes) ->
 
 encode_attribute_name(custom_user_data) -> "CustomUserData";
 encode_attribute_name(enabled) -> "Enabled";
-encode_attribute_name(token) -> "Token".
+encode_attribute_name(token) -> "Token";
+encode_attribute_name(user_id) -> "UserId";
+encode_attribute_name(channel_id) -> "ChannelId".
 
 encode_permissions(Permissions) ->
     [encode_permission(P) || P <- Permissions].
